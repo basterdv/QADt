@@ -103,6 +103,7 @@ def analise():
 
 
 
+
 # создаем блок для загруки данных из файла
 frame1 = ttk.LabelFrame(text='Таблица обезличенных сделок', width=1000, height=800)
 frame1.grid(column=0, row=0, padx=5, ipady=200, ipadx=220)
