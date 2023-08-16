@@ -14,7 +14,9 @@ root.geometry("1500x675")
 qp_provider = QuikPy()  # Подключение к локальному запущенному терминалу QUIK по портам по умолчанию
 # root.minsize(width=300, height=400)
 # # root.resizable(width=0, height=0)
-filter_sec = [('SBER', '2'),('VTBR','10')]
+filter_sec = [('VTBR', '100'),('SBER', '200')]
+
+
 def close_connect():
     qp_provider.CloseConnectionAndThread()
 
@@ -84,36 +86,36 @@ def print_callback(data):
     df = df[['trade_num', 'datetime', 'seccode', 'price', 'qty', 'value', 'flags']]
 
     # filter_sec = ['SBER','VTBR', 'LKOH']
-    filter_sec = ['SBER']
+    #filter_sec = ['SBER']
 
     df_row = df.to_numpy().tolist()
+    new_filter = []
+    for i in filter_sec:
+        new_filter.append(i[0])
 
     for row in df_row:
         # фильтруем поток по выбранным инстментам
-        for i in filter_sec:
+        for i in new_filter:
             if row[2] == i:
                 tree.insert("", END, values=row)
 
 
 def analise():
     btn.configure(state=DISABLED)
-    time_tape = int(input1.get())*300
+    time_tape = int(input1.get()) * 300
     root.after(time_tape, lambda: analise())
 
-    listbox1.insert(0, f'Проверяем ленту каждые {time_tape/300} секунд')
+    listbox1.insert(0, f'Проверяем ленту каждые {time_tape / 300} секунд')
 
     list_sec = []
     for i in tree3.get_children(""):
         row = tree3.item(i)
         list_sec.append(row['values'])
-    #print(list_sec)
 
     new_list = []
     for k in tree.get_children(""):
         row = tree.item(k)
         new_list.append(row['values'])
-
-
 
     df_a = pd.DataFrame(new_list, columns=['key1', 'key2', 'key3', 'key4', 'key5', 'key6', 'key7'])
     df_a['key5'] = df_a['key5'].astype('float')
@@ -127,11 +129,18 @@ def analise():
 
     # df1 = df_a[~que].groupby(subset2)['key5'].sum()
     # df1 = df_a.groupby(subset2)['key5'].sum().reset_index()
-    #print(df1)
+    # print(df1)
+
+    df1 = df1[['key2', 'key3', 'key5', 'key7']]
+    print(df1)
     df_row = df1.to_numpy().tolist()
+    tree2.delete(*tree2.get_children())
     for row in df_row:
-        print(row[0])
-        tree2.insert("", END, values=row)
+        for j in range(2):
+            if row[1] == list_sec[j][0] and row[2] >= list_sec[j][1]:
+                tree2.insert("", END, values=row)
+
+
 # # создаем блок для загруки данных из файла
 # frame1 = ttk.LabelFrame(text='Таблица обезличенных сделок', width=400, height=400)
 # frame1.grid(column=0, row=0, padx=5,sticky=W,rowspan=2)
@@ -148,22 +157,21 @@ def analise():
 
 # создаем блок для загруки данных из файла
 frame1 = ttk.LabelFrame(text='Таблица обезличенных сделок', width=528, height=500)
-frame1.grid(column=0, row=0, padx=5,sticky=W,rowspan=2,)
+frame1.grid(column=0, row=0, padx=5, sticky=W, rowspan=2, )
 
-
-#frame1.grid(column=0, row=0, padx=5, ipady=200, ipadx=170,sticky=W,rowspan=2)
+# frame1.grid(column=0, row=0, padx=5, ipady=200, ipadx=170,sticky=W,rowspan=2)
 # создаем блок для управления
 frame2 = ttk.LabelFrame(text='2', width=100, height=100)
-frame2.grid(column=2, row=0,  padx=5, )
+frame2.grid(column=2, row=0, padx=5, )
 # Логер
 frame3 = ttk.LabelFrame(text='log frame', width=850, height=250)
-frame3.grid(column=0, row=2, columnspan = 3,sticky=W,padx=5)
+frame3.grid(column=0, row=2, columnspan=3, sticky=W, padx=5)
 # таблица для анализа
 frame4 = ttk.LabelFrame(text='Расчёт', width=400, height=250)
-frame4.grid(column=2, row=1,padx=5,sticky=SW )
+frame4.grid(column=2, row=1, padx=5, sticky=SW)
 # Таблица фиксированных значений инструментов
-frame5 = ttk.LabelFrame(text='5', width=150,height=500)
-frame5.grid(column=1,row=0,rowspan=2)
+frame5 = ttk.LabelFrame(text='5', width=150, height=500)
+frame5.grid(column=1, row=0, rowspan=2)
 
 listbox1 = Listbox(frame3, width=160)
 listbox1.pack(side='left')
@@ -174,9 +182,9 @@ label1.grid(column=0, row=1)
 label2 = ttk.Label(frame2, text='Анализ ленты секунд - ')
 label2.grid(column=0, row=2)
 
-input1 = ttk.Entry(frame2,width=2,)
-input1.grid(column=1, row=2,sticky=W)
-input1.insert(0, '5')
+input1 = ttk.Entry(frame2, width=2, )
+input1.grid(column=1, row=2, sticky=W)
+input1.insert(0, '25')
 
 labe3 = ttk.Label(frame2, text='')
 labe3.grid(column=1, row=2)
@@ -193,9 +201,9 @@ btn.grid(column=1, row=0)
 # определяем столбцы
 columns = ('key1', 'key2', 'key3', 'key4', 'key5', 'key6', 'key7')
 
-tree = ttk.Treeview(frame1, columns=columns, show="headings",)
+tree = ttk.Treeview(frame1, columns=columns, show="headings", )
 vsb = ttk.Scrollbar(root, orient="vertical", command=tree.yview)
-vsb.place(x=30+481+2, y=19, height=458+20)
+vsb.place(x=30 + 481 + 2, y=19, height=458 + 20)
 tree.configure(yscrollcommand=vsb.set)
 tree.place(relheight=1, relwidth=1)
 
@@ -224,41 +232,44 @@ tree.column("#6", stretch=NO, width=60)
 tree.column("#7", stretch=NO, width=100)
 
 # определяем столбцы для таблицы 2
-columns2 = ('key1', 'key2', 'key3', 'key4',)
+columns2 = ('key1', 'key2', 'key3', 'key4', 'key5')
 
 tree2 = ttk.Treeview(frame4, columns=columns2, show="headings")
-tree2.place(relheight=1, relwidth=1)
+vsb = ttk.Scrollbar(root, orient="vertical", command=tree2.yview)
+vsb.place(x=30 + 1042 + 2, y=265, height=230 + 2)
+tree2.configure(yscrollcommand=vsb.set)
 
-treescrolly2 = ttk.Scrollbar(tree2, orient="vertical", command=tree2.yview)
-treescrollx2 = ttk.Scrollbar(tree2, orient='horizontal', command=tree2.xview)
-tree2.configure(xscrollcommand=treescrollx2.set, yscrollcommand=treescrolly2.set)
-treescrolly2.pack(side='right', fill='y')
-treescrollx2.pack(side='bottom', fill='x')
+tree2.place(relheight=1, relwidth=1)
 
 # определяем заголовки
 tree2.heading("key1", text="Время", anchor=W)
 tree2.heading("key2", text="Тикер", anchor=W)
 tree2.heading("key3", text="Кол-во лотов")
-tree2.heading("key4", text="Направление")
+tree2.heading("key4", text="Кол-во сделок")
+tree2.heading("key5", text="Направление")
 
 # настраиваем столбцы
-tree2.column("#1", stretch=NO, width=110)
-tree2.column("#2", stretch=NO, width=60)
-tree2.column("#3", stretch=NO, width=100)
-tree2.column("#4", stretch=NO, width=60)
-# tree2.column("#5", stretch=NO, width=60)
+tree2.column("#1", stretch=NO, width=60)
+tree2.column("#2", stretch=NO, width=50)
+tree2.column("#3", stretch=NO, width=90)
+tree2.column("#4", stretch=NO, width=90)
+tree2.column("#5", stretch=NO, width=90)
 
 # Список настроек для инструментов
 columns3 = ('key1', 'key2',)
 
 tree3 = ttk.Treeview(frame5, columns=columns3, show="headings")
+# vsb = ttk.Scrollbar(root, orient="vertical", command=tree.yview)
+# vsb.place(x=30 + 481 + 2, y=19, height=458 + 20)
+# tree3.configure(yscrollcommand=vsb.set)
+
 tree3.place(relheight=1, relwidth=1)
 
-treescrolly3 = ttk.Scrollbar(tree3, orient="vertical", command=tree3.yview)
-treescrollx3 = ttk.Scrollbar(tree3, orient='horizontal', command=tree3.xview)
-tree3.configure(xscrollcommand=treescrollx3.set, yscrollcommand=treescrolly3.set)
-treescrolly3.pack(side='right', fill='y')
-treescrollx3.pack(side='bottom', fill='x')
+# treescrolly3 = ttk.Scrollbar(tree3, orient="vertical", command=tree3.yview)
+# treescrollx3 = ttk.Scrollbar(tree3, orient='horizontal', command=tree3.xview)
+# tree3.configure(xscrollcommand=treescrollx3.set, yscrollcommand=treescrolly3.set)
+# treescrolly3.pack(side='right', fill='y')
+# treescrollx3.pack(side='bottom', fill='x')
 
 # определяем заголовки
 tree3.heading("key1", text="Тикер", anchor=W)
