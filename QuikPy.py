@@ -444,7 +444,8 @@ class QuikPy:
 
     def GetNumCandles(self, tag, trans_id=0):  # 2
         """Кол-во свечей по тэгу"""
-        return self.process_request({'data': tag, 'id': trans_id, 'cmd': 'get_num_candles', 't': ''})
+        # return self.process_request({'data': tag, 'id': trans_id, 'cmd': 'get_num_candles', 't': ''})
+        return self.process_request({'data': tag, 'cmd': 'get_num_candles'})
 
     # getCandlesByIndex - 3. Информация о свечках (реализовано в get_candles)
     # CreateDataSource - 4. Создание источника данных c функциями: (реализовано в get_candles_from_data_source)

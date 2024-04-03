@@ -63,6 +63,9 @@ def print_callback(data):
 
     if df_row[0][2] == secCode:
         print(df_row[0])
+        if df_row [0][4] > 5000:
+            print(f'{df_row[0][6]} {df_row[0][4]} лотов в {df_row[0][1]}')
+            qp_provider.MessageWarning(f'{df_row[0][6]} {df_row[0][4]} лотов в {df_row[0][1]}')
 
     # new_filter = []
     # for i in open_config():
@@ -201,8 +204,8 @@ def test():
     tes = qp_provider.GetNumCandles(tag)
     print(tes)
     # tesdel = qp_provider.DelAllLabels(tag)
-    testadd = qp_provider.AddLabel(price, cur_date, cur_time, qty, path, label_id, alignment, background)
-    print(testadd)
+    # testadd = qp_provider.AddLabel(price, cur_date, cur_time, qty, path, label_id, alignment, background)
+    # print(testadd)
 
 
 if __name__ == '__main__':  # Точка входа при запуске этого скрипта
@@ -215,7 +218,7 @@ if __name__ == '__main__':  # Точка входа при запуске это
     # Получение информации по тикеру
     get_ticker_info()
     #  получения обезличенных сделок
-    # get_data()
+    get_data()
     tag = 'VTBR_tag'
 
     price = '0,023131'
@@ -227,10 +230,9 @@ if __name__ == '__main__':  # Точка входа при запуске это
     alignment = 'LEFT'
     background = '1'
 
-    test()
 
     # Запрос текущего стакана. Чтобы получать, в QUIK открыть Таблицу Котировки, указать тикер
     # print(f'Текущий стакан {classCode}.{secCode}:', qp_provider.GetQuoteLevel2(classCode, secCode)['data'])
 
     # Выход
-    qp_provider.CloseConnectionAndThread()  # Перед выходом закрываем соединение и поток QuikPy
+    # qp_provider.CloseConnectionAndThread()  # Перед выходом закрываем соединение и поток QuikPy
